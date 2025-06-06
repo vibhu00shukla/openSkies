@@ -1,4 +1,4 @@
-const joi = require('joi');
+const joi = require('joi'); //joi is a validation library for JavaScript objects
   module.exports.campgroundSchema= joi.object({
     campground: joi.object({
       title: joi.string().required(),
@@ -9,4 +9,9 @@ const joi = require('joi');
     }).required()
   });
 
-;
+module.exports.reviewSchema = joi.object({
+  review: joi.object({
+    body: joi.string().required(),
+    rating: joi.number().required().min(1).max(5)
+  }).required()
+})
