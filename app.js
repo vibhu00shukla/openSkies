@@ -11,6 +11,8 @@ const ejsMate = require('ejs-mate');
 const methodoOverride = require('method-override');
 // const Campground = require('./models/campground'); 
 // const Review = require('./models/review'); 
+const session = require('express-session');
+const flash = require('connect-flash');
 
 const campgrounds = require('./routes/campgrounds');
 const reviews = require('./routes/reviews');
@@ -21,16 +23,29 @@ app.use(methodoOverride('_method'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));// Use method-override to support PUT and DELETE methods in forms
 
+const sessionConfig = {
+  secret: 'your secret key',
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    httpOnly: true // Helps prevent XSS attacks
+  }
+};
+app.use(session(sessionConfig));
+app.use(flash());
+
+app.use((req, res, next) => {
+  res.locals.success =req.flash('success');
+  res.locals.error = req.flash('error');
+  next();
+}
+);
 app.use('/campgrounds', campgrounds);
 app.use('/campgrounds/:id/reviews', reviews);
 
-
-
-
-
 mongoose.connect('mongodb://localhost:27017/openSkies' )
-
-
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -49,11 +64,6 @@ app.set('views',path.join( __dirname , 'views'));
 app.get('/', (req, res) => {
   res.render('home')
 })
-
-
-
-
-
 
 app.all(/(.*)/, (req, res, next) => {
   next(new expressError('Page not found', 404));
