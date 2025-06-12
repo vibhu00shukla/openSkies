@@ -4,7 +4,7 @@ const cities = require('./cities');
 const { places, descriptors } = require('./seedHelpers');
 const mongoose = require('mongoose');
 
-const Campground = require('../models/campground'); // Uncomment if you have a Campground model
+const Campground = require('../models/campground'); 
 
 
 
