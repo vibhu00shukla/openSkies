@@ -53,9 +53,17 @@
             <div class="card mb-3">
                 <div class="card-body">
                     <h5 class="card-title">Rating: <%= review.rating %></h5>
+                    <% if (review.author) { %>
+                        <h6 class="card-subtitle mb-2 text-muted">By <%= review.author.username %></h6>
+                        <% } else { %>
+                        <h6 class="card-subtitle mb-2 text-muted text-danger">Author Unknown</h6>
+                        <% } %>
                     <p class="card-text">Review: <%= review.body %></p>
                     <form action="/campgrounds/<%= campground._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
-                        <button class="btn btn-sm btn-danger">Delete</button>
+            <% if (currentUser && review.author && review.author._id.toString() === currentUser._id.toString()) { %>
+                <button class="btn btn-sm btn-danger">Delete</button>
+            <% } %>
+
                     </form>
                 </div>
             </div>

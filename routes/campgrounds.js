@@ -58,8 +58,13 @@ router.put('/:id',isLoggedIn, validateCampground ,catchAsync(async (req, res) =>
 
 router.get('/:id', catchAsync(async (req, res) => {
   const { id } = req.params
-    const campground = await Campground.findById(id).populate('reviews').populate('author');// populate means to replace the ObjectId with the actual document
-    console.log(campground);
+    const campground = await Campground.findById(req.params.id).populate({
+        path: 'reviews',
+        populate: {
+            path: 'author'
+        }
+    }).populate('author');// populate means to replace the ObjectId with the actual document
+    
     if (!campground) {
       req.flash('error', 'Campground not found');
       return res.redirect('/campgrounds');
