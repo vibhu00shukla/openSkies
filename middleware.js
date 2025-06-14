@@ -39,6 +39,22 @@ module.exports.isAuthor =async  (req, res, next) => {
   }
   next();
 }
+const Review = require('./models/review');
+
+module.exports.isReviewAuthor = async (req, res, next) => {
+    const { reviewId } = req.params;
+    const review = await Review.findById(reviewId);
+    if (!review) {
+        req.flash('error', 'Review not found');
+        return res.redirect('back');
+    }
+    if (!review.author.equals(req.user._id)) {
+        req.flash('error', 'You do not have permission to do that!');
+        return res.redirect(`/campgrounds/${req.params.id}`);
+    }
+    next();
+};
+
 
 module.exports.validateReview = (req, res, next) => {
   const {error} = reviewSchema.validate(req.body);

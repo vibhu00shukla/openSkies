@@ -5,35 +5,13 @@ const Campground = require('../models/campground');
 const { reviewSchema } = require('../schema.js');
 const Review = require('../models/review');
 const Joi = require('joi');
-const { isLoggedIn,isAuthor } = require('../middleware');
+const { isLoggedIn,isAuthor, isReviewAuthor } = require('../middleware');
 const { validateReview } = require('../middleware');
+const reviewsController = require('../controllers/reviewsController');
 
 
+router.post('/',isLoggedIn,validateReview, catchAsync(reviewsController.createReview));
 
-router.post('/',isLoggedIn,validateReview, catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const campground = await Campground.findById(id);
-  const review = new Review(req.body.review);
-  review.author = req.user._id; // Set the author to the currently logged-in user
-  console.log(campground);
-  campground.reviews.push(review);
-  await campground.save();
-  await review.save();
-    req.flash('success', 'Successfully added a new review!');
-  res.redirect(`/campgrounds/${campground._id}`);
-}))
-
-router.delete('/:reviewId',isLoggedIn,isAuthor, catchAsync(async (req, res) => {
-  const { id, reviewId } = req.params;
-  const campground = await Campground.findById(id);
-  if (!campground) {
-    return res.status(404).send('Campground not found');
-  }
-  campground.reviews.pull(reviewId);
-  await campground.save();
-  await Review.findByIdAndDelete(reviewId);
-  req.flash('success', 'Review deleted successfully!');
-  res.redirect(`/campgrounds/${campground._id}`);
-}))
+router.delete('/:reviewId',isLoggedIn,isReviewAuthor, catchAsync(reviewsController.deleteReview));
 
 module.exports = router;
