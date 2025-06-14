@@ -8,20 +8,17 @@ const Joi = require('joi');
 const {isLoggedIn,isAuthor,validateCampground} = require('../middleware');
 const { renderNewForm } = require('../controllers/campgroundController');
 
-router.get('/', catchAsync(campgroundController.index));
+router.route('/')
+  .get(catchAsync(campgroundController.index))
+  .post(isLoggedIn, validateCampground, catchAsync(campgroundController.createCampground));
 
 router.get('/new', isLoggedIn, renderNewForm);
 
-router.post('/', isLoggedIn, validateCampground, catchAsync(campgroundController.createCampground));
+router.route('/:id')
+ .get(catchAsync(campgroundController.showCampground))
+  .put(isLoggedIn, validateCampground, catchAsync(campgroundController.updateCampground))
+  .delete(isLoggedIn, isAuthor, catchAsync(campgroundController.deleteCampground));
 
 router.get('/:id/edit', isLoggedIn, isAuthor, catchAsync(campgroundController.renderEditForm));
-
-router.put('/:id', isLoggedIn, validateCampground, catchAsync(campgroundController.updateCampground));
-
-router.get('/:id', catchAsync(campgroundController.showCampground));
-
-router.delete('/:id', isLoggedIn, catchAsync(campgroundController.deleteCampground));
-
-
 
 module.exports = router;

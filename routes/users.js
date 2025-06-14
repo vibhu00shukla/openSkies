@@ -7,14 +7,15 @@ const { isLoggedIn } = require('../middleware');
 const {storeReturnTo} = require('../middleware');
 const usersController = require('../controllers/usersControllers');
 
-router.get('/register', usersController.registerForm);
-
-router.post('/register', catchAsync(usersController.renderRegister));
-
-router.get('/login',usersController.renderLogin);
 
 
-router.post('/login',storeReturnTo, usersController.login);
+router.route('/register')
+  .get(usersController.registerForm)
+  .post(catchAsync(usersController.renderRegister));
+
+router.route('/login')
+  .get(usersController.renderLogin)
+  .post(storeReturnTo, usersController.login);
 
 router.get('/logout', usersController.logout);
 
