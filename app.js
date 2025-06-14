@@ -7,7 +7,7 @@ const ejsMate = require('ejs-mate');
 // const joi = require('joi');
 // // const { campgroundSchema ,reviewSchema } = require('./schema.js'); 
 // const catchAsync = require('./utils/catchAsync'); 
-const expressError = require('./utils/ExpressError'); 
+const ExpressError = require('./utils/ExpressError'); 
 const methodoOverride = require('method-override');
 // const Campground = require('./models/campground'); 
 // const Review = require('./models/review'); 
@@ -78,7 +78,7 @@ app.get('/', (req, res) => {
 })
 
 app.all(/(.*)/, (req, res, next) => {
-  next(new expressError('Page not found', 404));
+  next(new ExpressError('Page not found', 404));
   console.log("404 hit for", req.url);
 });
 

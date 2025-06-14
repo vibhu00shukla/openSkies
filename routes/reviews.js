@@ -1,28 +1,20 @@
 const express = require('express');
 const router = express.Router({mergeParams: true}); // mergeParams allows us to access params from the parent route
-const catchAsync = require('../utils/catchAsync'); 
-const expressError = require('../utils/ExpressError'); 
+const catchAsync = require('../utils/catchAsync');  
 const Campground = require('../models/campground'); 
 const { reviewSchema } = require('../schema.js');
 const Review = require('../models/review');
 const Joi = require('joi');
-const { isLoggedIn } = require('../middleware');
+const { isLoggedIn,isAuthor } = require('../middleware');
+const { validateReview } = require('../middleware');
 
-const validateReview = (req, res, next) => {
-  const {error} = reviewSchema.validate(req.body);
-  if (error) {
-    const msg = error.details.map(el => el.message).join(',');
-    return next(new expressError(msg, 400));
-  }
-  else{
-    next();
-  }
-}
 
-router.post('/',isLoggedIn, validateReview, catchAsync(async (req, res) => {
+
+router.post('/',isLoggedIn,validateReview, catchAsync(async (req, res) => {
   const { id } = req.params;
   const campground = await Campground.findById(id);
   const review = new Review(req.body.review);
+  review.author = req.user._id; // Set the author to the currently logged-in user
   campground.reviews.push(review);
   await campground.save();
   await review.save();
@@ -30,7 +22,7 @@ router.post('/',isLoggedIn, validateReview, catchAsync(async (req, res) => {
   res.redirect(`/campgrounds/${campground._id}`);
 }))
 
-router.delete('/:reviewId',isLoggedIn, catchAsync(async (req, res) => {
+router.delete('/:reviewId',isLoggedIn,isAuthor, catchAsync(async (req, res) => {
   const { id, reviewId } = req.params;
   const campground = await Campground.findById(id);
   if (!campground) {
