@@ -1,17 +1,14 @@
 const express = require('express');
-const router = express.Router({mergeParams: true}); // mergeParams allows us to access params from the parent route
-const catchAsync = require('../utils/catchAsync');  
-const Campground = require('../models/campground'); 
-const { reviewSchema } = require('../schema.js');
+const router = express.Router({ mergeParams: true });
+const { validateReview, isLoggedIn, isReviewAuthor } = require('../middleware');
+const Campground = require('../models/campground');
 const Review = require('../models/review');
-const Joi = require('joi');
-const { isLoggedIn,isAuthor, isReviewAuthor } = require('../middleware');
-const { validateReview } = require('../middleware');
-const reviewsController = require('../controllers/reviewsController');
+const reviews = require('../controllers/reviews');
+const ExpressError = require('../utils/ExpressError');
+const catchAsync = require('../utils/catchAsync');
 
+router.post('/', isLoggedIn, validateReview, catchAsync(reviews.createReview))
 
-router.post('/',isLoggedIn,validateReview, catchAsync(reviewsController.createReview));
-
-router.delete('/:reviewId',isLoggedIn,isReviewAuthor, catchAsync(reviewsController.deleteReview));
+router.delete('/:reviewId', isLoggedIn, isReviewAuthor, catchAsync(reviews.deleteReview))
 
 module.exports = router;

@@ -5,7 +5,7 @@ const joi = require('joi'); //joi is a validation library for JavaScript objects
       location: joi.string().required(),
       description: joi.string().required(),
       price: joi.number().required().min(0),
-      image: joi.string().required(),
+      // image: joi.string().required(),
     }).required()
   });
 

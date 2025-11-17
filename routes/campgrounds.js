@@ -1,30 +1,28 @@
 const express = require('express');
 const router = express.Router();
-const catchAsync = require('../utils/catchAsync'); 
-const Campground = require('../models/campground');
-const campgroundController = require('../controllers/campgroundController');
-const multer = require('multer');// Middleware for handling multipart/form-data, which is used for uploading files
-const upload =multer({ dest: 'uploads/' }); // Configure multer for file uploads
+const campgrounds = require('../controllers/campgrounds');
+const catchAsync = require('../utils/catchAsync');
+const { isLoggedIn, isAuthor, validateCampground } = require('../middleware');
+const multer = require('multer');
+const { storage } = require('../cloudinary');
+const upload = multer({ storage });
 
-const Joi = require('joi');
-const {isLoggedIn,isAuthor,validateCampground} = require('../middleware');
-const { renderNewForm } = require('../controllers/campgroundController');
+const Campground = require('../models/campground');
 
 router.route('/')
-  .get(catchAsync(campgroundController.index))
-  // .post(isLoggedIn, validateCampground, catchAsync(campgroundController.createCampground));
-  .post(upload.array('image'),(req,res) => {
-    console.log(req.body,req.files)
-    res.send('File uploaded successfully');
-  })
+    .get(catchAsync(campgrounds.index))
+    .post(isLoggedIn, upload.array('image'), validateCampground, catchAsync(campgrounds.createCampground))
 
-router.get('/new', isLoggedIn, renderNewForm);
+
+router.get('/new', isLoggedIn, campgrounds.renderNewForm)
 
 router.route('/:id')
- .get(catchAsync(campgroundController.showCampground))
-  .put(isLoggedIn, validateCampground, catchAsync(campgroundController.updateCampground))
-  .delete(isLoggedIn, isAuthor, catchAsync(campgroundController.deleteCampground));
+    .get(catchAsync(campgrounds.showCampground))
+    .put(isLoggedIn, isAuthor, upload.array('image'), validateCampground, catchAsync(campgrounds.updateCampground))
+    .delete(isLoggedIn, isAuthor, catchAsync(campgrounds.deleteCampground));
 
-router.get('/:id/edit', isLoggedIn, isAuthor, catchAsync(campgroundController.renderEditForm));
+router.get('/:id/edit', isLoggedIn, isAuthor, catchAsync(campgrounds.renderEditForm))
+
+
 
 module.exports = router;
